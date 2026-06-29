@@ -19,9 +19,7 @@ The regressors created from these primary predictors include the raw values, squ
 To ensure that the influence of only one efficiency metric is present in each regression, the regressors used will depend on the regression's dependent variable. All regressions will include the regressors that have nothing to do with the efficiency metrics, but the variables that do must match the dependent variable in the regression. For example, the regressions with PER dependent variables will have only the PER raw values, squared variables, and interactions. This phenomenon is demonstrated through the table below.
 
 | Types of DV | PER DVs | BPM DVs | VORP DVs |
-
 |---|---|---|---|
-
 | Included Regressors | Non-efficiency metric regressors + PER raw predictors, square variables, and interactions | Non-efficiency metric regressors + BPM raw predictors, square variables, and interactions | Non-efficiency metric regressors + VORP raw predictors, square variables, and interactions |
 
 Because of this process, only 519 of the 643 total regressors will appear in each regression.
@@ -29,15 +27,10 @@ Because of this process, only 519 of the 643 total regressors will appear in eac
 For each dependent variable, standardized and unstandardized, four regression methods were used to process the data, totaling 24 regressions. The regression models utilized and any special procedures accompanied by them are as follows:
 
 | Regression Method | Special Procedures |
-
 |---|---|
-
 | Ordinary Least Squares (OLS) | No special procedures, run normally |
-
 | Ridge | Obtain optimal penalty factor (lambda) using m-fold cross validation and implement it when regressing on in-sample data |
-
-| LASSO | Obtain optimal penalty factor (lambda) using m-fold cross-validation and implement it when regressing on in-sample data |
-
+| LASSO | Obtain optimal penalty factor (lambda) using m-fold cross validation and implement it when regressing on in-sample data |
 | Principal Component Analysis (PCA) | Obtain scree plot of PCs and keep minimum amount to encompass 95% of variation |
 
 ### Classifcation of Season Quality and Final Analysis
@@ -58,18 +51,14 @@ With each value being designated appropriately, each estimate was then compared 
 
 ## Key Results
 
-Bold = Best within DV | Italic = Best of all DVs
+**Bold** = Best within DV | *Italic* = Best of all DVs
 
-Correct Prediction % Above Naive Model
+**Correct Prediction % Above Naive Model**
 
 | | OLS | Ridge | LASSO | PCA |
-
 |---|---|---|---|---|
-
 | PER | -6.53% | -8.25% | -6.82% | -5.50% |
-
 | BPM | -7.90% | -6.19% | -5.50% | -5.50% |
-
 | VORP | -6.53% | -2.06% | -1.72% | ***0%*** |
 
 The above table demonstrates that not only do none of the efficiency metrics predict better than the naive model, but also that the best available means of prediction (the PCA VORP model) performs, at best, on par with the naive model. Not only that, this specific model is incapable of predicting any "Breakout" seasons, with none of the 9 seasons of this caliber being categorized as such by the estimates. Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality.

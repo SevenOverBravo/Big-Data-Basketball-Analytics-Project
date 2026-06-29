@@ -57,8 +57,8 @@ With each value being designated appropriately, each estimate was then compared 
 
 | | OLS | Ridge | LASSO | PCA |
 |---|---|---|---|---|
-| PER | -6.53% | -8.25% | -6.82% | -5.50% |
-| BPM | -7.90% | -6.19% | -5.50% | -5.50% |
+| PER | -6.53% | -8.25% | -6.82% | **-5.50%** |
+| BPM | -7.90% | -6.19% | -5.50% | **-5.50%** |
 | VORP | -6.53% | -2.06% | -1.72% | ***0%*** |
 
 The above table demonstrates that not only do none of the efficiency metrics predict better than the naive model, but also that the best available means of prediction (the PCA VORP model) performs, at best, on par with the naive model. Not only that, this specific model is incapable of predicting any "Breakout" seasons, with none of the 9 seasons of this caliber being categorized as such by the estimates. Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality.

@@ -1,3 +1,5 @@
+#IMPORTANT: This script outputs ONLY THE OUT OF SAMPLE DATA. However, the same script was used to print the in-sample data when the
+# years in the ALL_YEARS variable were changed to 2008 and 2026
 import time
 import unicodedata
 import pandas as pd
@@ -14,27 +16,27 @@ from nba_api.stats.endpoints import (
 )
 from nba_api.stats.static import teams as nba_teams_static
 
-# ── Config ────────────────────────────────────────────────────────────────────
-ALL_YEARS  = list(range(2024, 2027))   # SEASON_END_YEAR; e.g. 2024 = 2023-24
+# Configure 
+ALL_YEARS  = list(range(2024, 2027))   # SEASON_END_YEAR
 MIN_GP_PCT = 0.45
-API_DELAY  = 1.2                        # nba_api is gentler than bref scraping
+API_DELAY  = 1.2                        
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# Normalizing player names/season titles, api precautions
 
 def normalize_name(name):
-    """Normalize player name to ASCII-compatible form for consistent merging."""
+    # Normalize player name to ASCII-compatible form for consistent merging
     if not isinstance(name, str):
         return name
     return unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii").strip()
 
 
 def season_str(yr):
-    """Convert season-end year to NBA API season string, e.g. 2024 → '2023-24'."""
+    # Convert season-end year to NBA API season string
     return f"{yr - 1}-{str(yr)[-2:]}"
 
 
 def nba_api_call(endpoint_cls, retries=4, **kwargs):
-    """Thin retry wrapper around any nba_api endpoint."""
+    # Thin retry wrapper around any nba_api endpoint
     for attempt in range(retries):
         try:
             time.sleep(API_DELAY)
@@ -47,7 +49,7 @@ def nba_api_call(endpoint_cls, retries=4, **kwargs):
     return pd.DataFrame()
 
 
-# ── Team abbreviation lookup (nba_api → canonical abbrev) ────────────────────
+# Look up team abbreviation
 
 def build_team_id_to_abb():
     """Return {team_id: abbrev} using nba_api's static team list."""
@@ -56,7 +58,7 @@ def build_team_id_to_abb():
 
 TEAM_ID_TO_ABB = build_team_id_to_abb()
 
-# Map nba_api 3-letter abbrevs to our canonical set (handles OKC=OKC, etc.)
+# List of team abbreviations
 ABB_ALIASES = {
     "NJN": "BKN", "BRK": "BKN",
     "CHO": "CHA", "CHH": "CHA",
@@ -75,15 +77,15 @@ def normalize_abb(abb):
     return ABB_ALIASES.get(abb, abb)
 
 
-# ── Advanced / BPM / VORP via PlayerBioStats + GeneralStats ──────────────────
-# nba_api does not expose BPM/VORP natively. We fetch:
-#   - LeagueDashPlayerStats (Base)   → GP, MIN, PTS, AST, REB, STL, BLK, TOV, TS%
-#   - LeagueDashPlayerBioStats       → AGE, POSITION (draft data separate)
-#   - LeagueDashPlayerStats (Advanced) → PER, USG%, ORTG, DRTG (per-player on/off)
+# ADVANCED STATS
+# We Obtain the following:
+#   - LeagueDashPlayerStats (Base): GP, MIN, PTS, AST, REB, STL, BLK, TOV, TS%
+#   - LeagueDashPlayerBioStats: AGE, POSITION (draft data separate)
+#   - LeagueDashPlayerStats (Advanced): PER, USG%, ORTG, DRTG (per-player on/off)
 #
-# BPM is not available through nba_api. We approximate it from on/off ratings:
+#   Approxiamate BPM with below formula:
 #   BPM ≈ (PlayerORTG - TeamORTG) + (TeamDRTG - PlayerDRTG)
-# Then compute VORP from the formula provided:
+#   Then compute VORP from the following formula:
 #   VORP = [BPM - (-2.0)] × (pct_minutes / 100) × (team_games / 82)
 
 def get_player_stats(yr):
@@ -94,11 +96,7 @@ def get_player_stats(yr):
     season = season_str(yr)
     print(f"  Player stats (base):     {season}")
 
-    # ── Base stats (per-game totals) ──────────────────────────────────────────
-    # NOTE: LeagueDashPlayerStats returns exactly one row per player for the
-    # season with no signal about team changes (no aggregate row, no
-    # per-team splits). Trade detection happens separately via game logs —
-    # see get_trade_splits() below.
+    # Base stats (per-game totals)
     base = nba_api_call(
         leaguedashplayerstats.LeagueDashPlayerStats,
         season=season,
@@ -125,17 +123,17 @@ def get_player_stats(yr):
         "FGM": "FGM",
     })
 
-    # TS% = PTS / (2 * (FGA + 0.44 * FTA))  — compute from raw counting stats
+    # TS% = PTS / (2 * (FGA + 0.44 * FTA)), compute from raw counting stats
     base["TS_PCT"] = np.where(
         (base["FGA"] + 0.44 * base["FTA"]) > 0,
         base["PTS_PG"] / (2 * (base["FGA"] + 0.44 * base["FTA"])),
         np.nan,
     )
 
-    # Total minutes for the season (needed for VORP pct_minutes)
+    # Total minutes for the season (For VORP formula)
     base["MP_TOTAL"] = base["MIN_PG"] * base["GP"]
 
-    # ── Advanced stats (PER, USG%, on/off ORTG/DRTG for BPM approximation) ───
+    # Advanced stats (PER, USG%, on/off ORTG/DRTG for BPM approximation)
     print(f"  Player stats (advanced): {season}")
     adv = nba_api_call(
         leaguedashplayerstats.LeagueDashPlayerStats,
@@ -147,13 +145,12 @@ def get_player_stats(yr):
     if not adv.empty:
         adv = adv[["PLAYER_ID", "USG_PCT", "PIE"]].copy()
         # PIE (Player Impact Estimate) is nba_api's closest analog to PER.
-        # We rename it PER as a practical substitute.
+        # Rename to PER
         adv = adv.rename(columns={"PIE": "PER"})
-        adv["PER"] = pd.to_numeric(adv["PER"], errors="coerce") * 100  # PIE is 0–1; scale to ~PER range
+        adv["PER"] = pd.to_numeric(adv["PER"], errors="coerce") * 100  # PIE is 0–1; scale to PER range
         adv["USG_PCT"] = pd.to_numeric(adv["USG_PCT"], errors="coerce") * 100
 
-    # ── Estimated metrics for BPM approximation ─────────────────────────────
-    # PlayerEstimatedMetrics is the correct endpoint for E_OFF_RATING/E_DEF_RATING
+    # Estimated metrics for BPM approximation
     print(f"  Player estimated metrics:{season}")
     onoff = nba_api_call(
         playerestimatedmetrics.PlayerEstimatedMetrics,
@@ -167,7 +164,7 @@ def get_player_stats(yr):
             "E_DEF_RATING": "PLAYER_DRTG",
         })
 
-    # ── Bio stats (age, position) ─────────────────────────────────────────────
+    # Bio stats (age, position)
     print(f"  Player bio stats:        {season}")
     bio = nba_api_call(
         leaguedashplayerbiostats.LeagueDashPlayerBioStats,
@@ -177,7 +174,7 @@ def get_player_stats(yr):
     if not bio.empty:
         bio = bio[["PLAYER_ID", "AGE", "PLAYER_HEIGHT", "PLAYER_WEIGHT"]].copy()
 
-    # ── Per-36 stats ──────────────────────────────────────────────────────────
+    # Per-36 stats
     print(f"  Player stats (per-36):   {season}")
     p36 = nba_api_call(
         leaguedashplayerstats.LeagueDashPlayerStats,
@@ -193,7 +190,7 @@ def get_player_stats(yr):
             "STL": "STL_36", "BLK": "BLK_36", "TOV": "TOV_36",
         })
 
-    # ── Merge everything onto base ────────────────────────────────────────────
+    # Merge everything onto base 
     df = base.copy()
     for extra in [adv, onoff, bio, p36]:
         if not extra.empty and "PLAYER_ID" in extra.columns:
@@ -202,19 +199,12 @@ def get_player_stats(yr):
     df["PLAYER_NAME"] = df["PLAYER_NAME"].apply(normalize_name)
     df["TEAM_ABB"]    = df["TEAM_ABB"].apply(normalize_abb)
 
-    # ── TRADED placeholder ─────────────────────────────────────────────────────
-    # This endpoint has no trade signal at all. TRADED gets overwritten in
-    # main() using get_trade_splits() (real per-team game counts from game
-    # logs); this is just a placeholder so the column exists here.
+    # TRADED placeholder
     df["TRADED"] = 0
 
     deduped = df.drop_duplicates(subset="PLAYER_NAME").copy()
 
-    # ── BPM approximation ─────────────────────────────────────────────────────
-    # For traded players the on/off ratings are already GP-weighted in the agg.
-    # BPM ≈ (PlayerORTG - TeamORTG) + (TeamDRTG - PlayerDRTG)
-    # We fill team ratings during the team-stats merge step in main().
-    # Store raw on/off here; team deltas computed later.
+    # BPM approximation 
     for c in ["PLAYER_ORTG", "PLAYER_DRTG"]:
         if c not in deduped.columns:
             deduped[c] = np.nan
@@ -225,7 +215,7 @@ def get_player_stats(yr):
     deduped["BPM"]  = np.nan
     deduped["VORP"] = np.nan
 
-    # ── Finalize types & season labels ───────────────────────────────────────
+    # Finalize types & season labels 
     for c in ["AGE", "GP", "MP_TOTAL", "PER", "TS_PCT", "USG_PCT"]:
         if c in deduped.columns:
             deduped[c] = pd.to_numeric(deduped[c], errors="coerce")
@@ -238,7 +228,7 @@ def get_player_stats(yr):
     return deduped
 
 
-# ── Team stats ────────────────────────────────────────────────────────────────
+# Team stats 
 
 def get_team_stats(yr):
     """
@@ -266,10 +256,6 @@ def get_team_stats(yr):
 
     result = {}
 
-    # LeagueDashTeamStats does NOT reliably return a TEAM_ABBREVIATION column
-    # (it only has TEAM_ID/TEAM_NAME) — unlike the player-level endpoints.
-    # Map TEAM_ID -> abbreviation via the static team list instead, falling
-    # back to TEAM_ABBREVIATION only if nba_api happens to provide it.
     if "TEAM_ABBREVIATION" in base.columns:
         base["TEAM_ABB"] = base["TEAM_ABBREVIATION"].apply(normalize_abb)
     else:
@@ -277,7 +263,7 @@ def get_team_stats(yr):
     base["TEAM_GP"]  = base["GP"]
     base["TEAM_WIN_PCT"] = base["W"] / (base["W"] + base["L"])
 
-    # Team TS% from base counting stats
+    # Team TS% from base stats
     base["TEAM_TS_PCT"] = np.where(
         (base["FGA"] + 0.44 * base["FTA"]) > 0,
         base["PTS"] / (2 * (base["FGA"] + 0.44 * base["FTA"])),
@@ -286,9 +272,6 @@ def get_team_stats(yr):
 
     team_df = base[["TEAM_ID", "TEAM_ABB", "TEAM_GP", "TEAM_WIN_PCT", "TEAM_TS_PCT"]].copy()
 
-    # TeamEstimatedMetrics does NOT return a TEAM_ABBREVIATION column (only
-    # TEAM_ID / TEAM_NAME), so we must merge it onto team_df by TEAM_ID rather
-    # than trying to derive TEAM_ABB from it directly.
     if not adv.empty and "TEAM_ID" in adv.columns:
         adv = adv.rename(columns={
             "E_OFF_RATING": "TEAM_ORTG",
@@ -316,7 +299,7 @@ def get_team_stats(yr):
     return result
 
 
-# ── Draft data ────────────────────────────────────────────────────────────────
+# Draft data 
 
 def get_draft_data():
     """
@@ -354,21 +337,9 @@ def get_draft_data():
     return df
 
 
-# ── Real trade detection + per-team GP splits via game logs ───────────────────
+# Real trade detection and per-team GP splits via game logs
 
 def get_trade_splits(yr):
-    """
-    LeagueDashPlayerStats has no trade signal at all (one row per player,
-    no aggregate row, no per-team splits). To detect trades and get real
-    per-team game counts for weighting team context, we pull the full
-    season's player game logs in a single call and derive both from real
-    game-level team assignments.
-
-    Returns:
-      traded_players: set of normalized PLAYER_NAME values who played for
-                       more than one team this season
-      stint_map:       {player_name: {team_abb: games_played_with_team}}
-    """
     season = season_str(yr)
     print(f"  Player game logs (trade detection): {season}")
 
@@ -405,10 +376,6 @@ def get_trade_splits(yr):
 
 
 def weighted_team_stats(player_name, stint_map, team_dict):
-    """
-    GP-weighted average of team context stats (ORTG/DRTG/TS%/WIN%) across a
-    traded player's real per-team game counts, sourced from get_trade_splits.
-    """
     stat_cols = ["TEAM_ORTG", "TEAM_DRTG", "TEAM_TS_PCT", "TEAM_WIN_PCT"]
 
     stints = stint_map.get(player_name, {})
@@ -431,7 +398,7 @@ def weighted_team_stats(player_name, stint_map, team_dict):
 
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# Main 
 
 def main():
     adv_ded     = {}
@@ -460,7 +427,7 @@ def main():
             print(f"  ERROR (trade splits): {e}")
             trade_info[yr] = (set(), {})
 
-    # ── Merge per season ──────────────────────────────────────────────────────
+    # Merge per season 
     frames = []
     for yr in ALL_YEARS:
         adv = adv_ded.get(yr, pd.DataFrame())
@@ -486,17 +453,12 @@ def main():
         team_df = pd.DataFrame(team_rows, index=adv.index)
         adv     = pd.concat([adv, team_df], axis=1)
 
-        # ── BPM approximation (now that we have team ORTG/DRTG) ──────────────
-        # BPM ≈ OBPM + DBPM
-        # OBPM ≈ PlayerORTG - TeamORTG
-        # DBPM ≈ TeamDRTG   - PlayerDRTG
+        # BPM approximation
         adv["OBPM"] = adv["PLAYER_ORTG"] - adv["TEAM_ORTG"]
         adv["DBPM"] = adv["TEAM_DRTG"]   - adv["PLAYER_DRTG"]
         adv["BPM"]  = adv["OBPM"] + adv["DBPM"]
 
-        # ── VORP approximation ───────────────────────────────────────────────
-        # VORP = [BPM - (-2.0)] × (pct_minutes / 100) × (team_games / 82)
-        # pct_minutes = MP_TOTAL / (TEAM_GP * 240)  [240 min/game for 5 players]
+        # VORP approximation
         adv["_PCT_MIN"] = adv["MP_TOTAL"] / (adv["TEAM_GP"] * 240) * 100
         adv["VORP"] = (adv["BPM"] - (-2.0)) * (adv["_PCT_MIN"] / 100) * (adv["TEAM_GP"] / 82)
         adv.drop(columns=["_PCT_MIN"], inplace=True)
@@ -515,7 +477,7 @@ def main():
     full = pd.concat(frames, ignore_index=True)
     full = full.sort_values(["PLAYER_NAME", "SEASON_END_YEAR"]).reset_index(drop=True)
 
-    # ── Merge draft data ──────────────────────────────────────────────────────
+    # Merge draft data 
     if not draft_df.empty:
         full = full.merge(draft_df, on="PLAYER_NAME", how="left")
         full["UNDRAFTED"]  = full["UNDRAFTED"].fillna(1).astype(int)
@@ -524,13 +486,13 @@ def main():
         full["UNDRAFTED"]  = 0
         full["DRAFT_PROP"] = np.nan
 
-    # ── GP eligibility ────────────────────────────────────────────────────────
+    # GP eligibility
     full["GP_ELIGIBLE"] = (full["GP_PCT"] >= MIN_GP_PCT).astype(int)
 
-    # ── Season number ─────────────────────────────────────────────────────────
+    # Season number 
     full["SEASON_NUM"] = full.groupby("PLAYER_NAME").cumcount() + 1
 
-    # ── Keep only players with >= 3 seasons in the window ────────────────────
+    # Keep only players with >= 3 seasons in the window 
     players_with_3 = (
         full.groupby("PLAYER_NAME")["SEASON_END_YEAR"]
         .count()[lambda s: s >= 3]
@@ -538,7 +500,7 @@ def main():
     )
     full = full[full["PLAYER_NAME"].isin(players_with_3)].copy()
 
-    # ── Lags and differentials ────────────────────────────────────────────────
+    # Lags and differentials 
     grp = full.groupby("PLAYER_NAME")
 
     full["LAST_TRADED"] = grp["TRADED"].shift(1)
@@ -561,7 +523,7 @@ def main():
         if col in full.columns:
             full[f"{col}_DIFF"] = full[col] - grp[col].shift(1)
 
-    # ── Position dummies ──────────────────────────────────────────────────────
+    # Position dummies 
     pos_map = {
         "PG": "Guard",   "SG": "Guard",   "G": "Guard",
         "SF": "Forward", "PF": "Forward", "F": "Forward",
@@ -574,10 +536,10 @@ def main():
         pos_dummies = pd.get_dummies(full["POSITION_CLEAN"], prefix="POS", drop_first=True)
         full = pd.concat([full, pos_dummies], axis=1)
 
-    # ── Keep only rows where SEASON_NUM >= 3 ─────────────────────────────────
+    # Keep only rows where SEASON_NUM >= 3 
     out_df = full[full["SEASON_NUM"] >= 3].copy()
 
-    # ── Drop rows with missing team context ───────────────────────────────────
+    # Drop rows with missing team context 
     team_required         = ["LAST_TEAM_ORTG_DIFF", "LAST_TEAM_DRTG_DIFF"]
     team_required_present = [c for c in team_required if c in out_df.columns]
     if team_required_present:
@@ -587,7 +549,7 @@ def main():
         if dropped > 0:
             print(f"  Dropped {dropped} rows with missing LAST_TEAM_ORTG/DRTG_DIFF")
 
-    # ── Keep only rows that pass the games-played eligibility test ───────────
+    # Keep only rows that pass the games-played eligibility test
     before_gp = len(out_df)
     out_df = out_df[out_df["GP_ELIGIBLE"] == 1].copy()
     dropped_gp = before_gp - len(out_df)
@@ -595,7 +557,7 @@ def main():
         print(f"  Dropped {dropped_gp} rows failing GP_ELIGIBLE "
               f"(GP_PCT < {MIN_GP_PCT})")
 
-    # ── Select output columns ─────────────────────────────────────────────────
+    # Select output columns 
     personal    = ["PLAYER_NAME", "SEASON", "SEASON_NUM", "AGE", "LAST_TRADED",
                    "DRAFT_PROP", "UNDRAFTED", "GP_PCT", "GP_ELIGIBLE"]
     pos_cols    = [c for c in out_df.columns if c.startswith("POS_")]
@@ -618,7 +580,7 @@ def main():
     final_cols = [c for c in final_cols if c in out_df.columns]
     out = out_df[final_cols].copy()
 
-    # ── Export ────────────────────────────────────────────────────────────────
+    # Export
     out.to_csv("nba_oos.csv", index=False)
     print(f"\n✓ Saved nba_oos.csv")
     print(f"  Seasons:        {sorted(out['SEASON'].unique())}")

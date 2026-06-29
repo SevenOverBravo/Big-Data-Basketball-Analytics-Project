@@ -44,3 +44,16 @@ Once the out-of-sample estimates have been calculated, they'll be compared again
 With each value being designated appropriately, each estimate was then compared to its true counterpart to see if their classification was identical, with a percentage of accurate predictions for each method being calculated. This percentage was then subtracted from that of the naive model (where every entry is classified as "Plateau", as this designation has the widest bounds and will be the most precise on average) as a measurement of accuracy comapred to when no information is known. 
 
 ## Key Results
+**Bold** = Best within DV | *Italic* = Best of all DVs
+
+**Correct Prediction % Above Naive Model**
+
+| | OLS | Ridge | LASSO | PCA |
+|---|---|---|---|---|
+| PER | -6.53% | -8.25% | -6.82% | **-5.50%** |
+| BPM | -7.90% | -6.19% | **-5.50%** | **-5.50%** |
+| VORP | -6.53% | -2.06% | -1.72% | ***0%*** |
+
+The above table demonstrates that not only do any of the efficiency metrics predict better than the naive model, but that the best available means of prediction (the PCA VORP model) performs, at best, on par with the naive model. Not only that, this specific model is incapable of predicting any "Breakout" seasons, with none of the 9 seasons of this calibur being categorized as such by the estimates. Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality.
+
+Further conclusions and opportunities for future research are located in the Presentation folder.

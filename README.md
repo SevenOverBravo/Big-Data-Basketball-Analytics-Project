@@ -62,7 +62,7 @@ With each value being designated appropriately, each estimate was then compared 
 | VORP | -6.53% | -2.06% | -1.72% | ***0%*** |
 
 **Confusion Matrix of Season Classifications**
-<img width="500" height="275" alt="image" src="https://github.com/user-attachments/assets/1da1cf8e-07fb-403f-8f4e-8da8e8927233" />
+<img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/1da1cf8e-07fb-403f-8f4e-8da8e8927233" />
 
 The above table demonstrates that not only do none of the efficiency metrics predict better than the naive model, but also that the best available means of prediction (the PCA VORP model) performs, at best, on par with the naive model. Not only that, this specific model is incapable of predicting any "Breakout" seasons, with none of the 9 seasons of this caliber being categorized as such by the estimates. Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality.
 

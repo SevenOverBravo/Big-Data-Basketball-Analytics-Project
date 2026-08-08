@@ -74,4 +74,7 @@ The confusion matrix, however, adds additional context to the percentage table. 
 Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality under this experiment's methodology.
 
 ## Limitations and Future Research
+In light of the unfavorable conclusion, it's worth noting that the methodology of this project has a number of potential flaws. The most prominent of these is the season classification system. While its implementation was simple, the system likely introduced systematic error into the experiment in many ways. One of these is the bounds of each category. The idea that only a few players can experience breakout seasons each year is intuitive, but the assumption that the proportion of bounds remains identical for each year is unsubstantiated. In reality, the amount of breakouts in a given season is dependent on a variety of personal, team, and administrative/coaching factors and changes dramatically each year. As a result, the classification system not only misrepresents the quality of each season by insisting a certain quantity must be in the extreme categories (i.e. Breakout or Notable Decline), but confabulates the estimated statistical values through the same means, adding bias into the experiment. 
+
+Another major issue with the classification system is 
 

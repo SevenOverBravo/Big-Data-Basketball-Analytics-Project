@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-This project aimed to discover the extent to which certain NBA efficiency metrics, namely Player Efficiency Rating (PER), Box Plus/Minus (BPM), and Value Over Replacement Player (VORP), can predict the quality of a player's next season. To accomplish this, choice variables from the 2010-2026 NBA seasons and multiple regression models (OLS, Ridge, LASSO, and PCA) were employed. After obtaining out-of-sample estimates for these statistics in Stata and calculating the percentage of correctly classified predictions, it was determined that (despite attempting to capture all of a player's individual contributions into a single value) none of these measurements could predict better than the naive model. 
+This project aimed to discover the extent to which certain NBA efficiency metrics, namely Player Efficiency Rating (PER), Box Plus/Minus (BPM), and Value Over Replacement Player (VORP), can predict the quality of a player's next season, namely any significant improvement between seasons (i.e. Breakouts). To accomplish this, choice variables from the 2010-2026 NBA seasons and multiple regression models (OLS, Ridge, LASSO, and PCA) were employed. After obtaining out-of-sample estimates for these statistics in Stata and calculating the percentage of correctly classified predictions, it was determined that (despite attempting to capture all of a player's individual contributions into a single value) none of these measurements could predict better than the naive model with this experiment's methodology.
 
 ## Data and Methodology
 

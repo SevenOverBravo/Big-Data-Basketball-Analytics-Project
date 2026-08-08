@@ -8,7 +8,7 @@ This project aimed to discover the extent to which certain NBA efficiency metric
 
 ### Obtaining and Configuring Data 
 
-All data was obtained using the nba_api Python package (locate the obtaindata.py in the "Data" file), which allows data to be taken from the official NBA website. Each row of data represents a single season for a specific NBA player (No G-League or college players). To ensure the results wouldn't be confabulated by outliers, only seasons where a player had participated in at least 45% of their team games were included in the dataset. The 45% value was chosen 
+All data was obtained using the nba_api Python package (locate the obtaindata.py in the "Data" file), which allows data to be taken from the official NBA website. Each row of data represents a single season for a specific NBA player (No G-League or college players). To ensure the results wouldn't be confabulated by outliers, only seasons where a player had participated in at least 45% of their team games were included in the dataset. The 45% value was chosen for multiple reasons. Firstly, it ensures that each season contains a large enough sample of games (30 to 40 depending on the overall season length) so that each statistic isn't confabulated by small-sample noise. Secondly, a 45% benchmark is crucial for player career continuity. In other words, it allows the majority of players' seasons to be utilized regardless of any injury-shortened seasons (namely the 30 to 40 game seasons of superstars Joel Embiid and Anthony Davis), meaning the variation between each subsequent season can be represented in the data.  
 
 The primary predictors include a variety of personal attributes (Age, Position), individual performance metrics (Points, Rebounds, etc.), and team data (Win/Loss Record, Strength of Schedule, etc.), as well as the efficiency metrics in question. For each of the individual and team statistics, the previous season value and differential (last season value - two seasons ago value) were taken to track their current state and movement respectfully. Our dependent variables are the current season differentials (current season - last season) for each efficiency metric. Full documentation of predictors can be found in the "variable_doc.md" file in the Data folder.
 
@@ -47,7 +47,7 @@ Worsening: Between -0.75SD from -1.5SD from Mean of efficiency metric differenti
 
 Notable Decline: >-1.5SD from Mean of efficiency metric differential
 
-The classification system was chosen based on the intuition that most
+The classification system was chosen for multiple reasons. Firstly, it reflects the intuition that only a handful of seasons in any given year will show any massive shift in quality (i.e. Breakout or Notable Decline), with most seasons hovering around the middle categories. Secondly, a Mean/SD model is not only simple to implement, but allows each efficiency metric to be categorized based on its own unique distribution, reflecting the scale and natural variance of each statistic. 
 
 With each value being designated appropriately, each estimate was then compared to its true counterpart to see if their classification was identical, with a percentage of accurate predictions for each method being calculated. This percentage was then subtracted from that of the naive model (where every entry is classified as "Plateau", as this designation has the widest bounds and will be the most precise on average) as a measurement of accuracy compared to when no information is known. 
 

@@ -82,4 +82,8 @@ Another major issue with the classification system is its misalignment with the 
 
 Outside of the classification system, other small issues persist in the study. For example, the quantity of regressors may be overbearing given how some trends are adequately explained with non-squared predictors (such as Age and Draft Proportion), yet square regressors were insisted upon anyway. Additionally, some potentially useful regressors were left out of the experiment completely, such as number of career injuries/games missed due to injury and binaries regular season awards (All-Star, All-NBA, MVP Voting, etc.). Future reiterations of this experiment would include a study of each regressor to determine if any squared variables are necessary and a wider variety of information as mentioned above. 
 
-If this project were to be repeated, the classification system would experience a major overhaul.
+If this project were to be repeated, the classification system would experience a major overhaul. One potential approach is use a metric independent from any of the efficiency statistics utilized in the study. Since each regression model had differing dependent variables depending on which efficiency metric they predicted, comparison between models with different metrics became a massive problem. Having a consistent dependent variable for each regression would not only remedy the comparison issue, but also contribute towards solving the previously mentioned problems with the season classification system.
+
+
+
+

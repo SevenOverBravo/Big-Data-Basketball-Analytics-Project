@@ -8,7 +8,7 @@ This project aimed to discover the extent to which certain NBA efficiency metric
 
 ### Obtaining and Configuring Data 
 
-All data was obtained using the nba_api Python package (locate the obtaindata.py in the "Data" file), which allows data to be taken from the official NBA website. Each row of data represents a single season for a specific NBA player (No G-League or college players). To ensure the results wouldn't be confabulated by outliers, only seasons where a player had participated in at least 45% of their team games were included in the dataset.
+All data was obtained using the nba_api Python package (locate the obtaindata.py in the "Data" file), which allows data to be taken from the official NBA website. Each row of data represents a single season for a specific NBA player (No G-League or college players). To ensure the results wouldn't be confabulated by outliers, only seasons where a player had participated in at least 45% of their team games were included in the dataset. The 45% value was chosen 
 
 The primary predictors include a variety of personal attributes (Age, Position), individual performance metrics (Points, Rebounds, etc.), and team data (Win/Loss Record, Strength of Schedule, etc.), as well as the efficiency metrics in question. For each of the individual and team statistics, the previous season value and differential (last season value - two seasons ago value) were taken to track their current state and movement respectfully. Our dependent variables are the current season differentials (current season - last season) for each efficiency metric. Full documentation of predictors can be found in the "variable_doc.md" file in the Data folder.
 
@@ -33,7 +33,7 @@ For each dependent variable, standardized and unstandardized, four regression me
 | LASSO | Obtain optimal penalty factor (lambda) using m-fold cross validation and implement it when regressing on in-sample data |
 | Principal Component Analysis (PCA) | Obtain scree plot of PCs and keep minimum amount to encompass 95% of variation |
 
-### Classifcation of Season Quality and Final Analysis
+### Classification of Season Quality and Final Analysis
 
 Once the out-of-sample estimates have been calculated, they'll be compared against their true counterparts to access prediction accuracy. Since season quality is the underlying factor in this analysis, the means and standard deviations for each of the true values of the efficiency metric differentials were tabulated, with season quality being determined as such:
 
@@ -46,6 +46,8 @@ Plateau: Between -0.75SD from +0.75SD from Mean of efficiency metric differentia
 Worsening: Between -0.75SD from -1.5SD from Mean of efficiency metric differential
 
 Notable Decline: >-1.5SD from Mean of efficiency metric differential
+
+The classification system was chosen based on the intuition that most
 
 With each value being designated appropriately, each estimate was then compared to its true counterpart to see if their classification was identical, with a percentage of accurate predictions for each method being calculated. This percentage was then subtracted from that of the naive model (where every entry is classified as "Plateau", as this designation has the widest bounds and will be the most precise on average) as a measurement of accuracy compared to when no information is known. 
 
@@ -61,10 +63,15 @@ With each value being designated appropriately, each estimate was then compared 
 | BPM | -7.90% | -6.19% | -5.50% | **-5.50%** |
 | VORP | -6.53% | -2.06% | -1.72% | ***0%*** |
 
-**Confusion Matrix of Season Classifications**
+**Confusion Matrix of Season Classifications: VORP PCA Model**
 
 <img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/1da1cf8e-07fb-403f-8f4e-8da8e8927233" />
 
-The above table demonstrates that not only do none of the efficiency metrics predict better than the naive model, but also that the best available means of prediction (the PCA VORP model) performs, at best, on par with the naive model. Not only that, this specific model is incapable of predicting any "Breakout" seasons, with none of the 9 seasons of this caliber being categorized as such by the estimates. Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality.
+The above table demonstrates that not only do none of the efficiency metrics predict better than the naive model, but also that the best available means of prediction (the PCA VORP model) performs, at best, on par with the naive model. So, as a general method of classifying season quality, the experiment's methodology appears to be of little use. 
 
-Further conclusions and opportunities for future research are located in the Presentation folder.
+The confusion matrix, however, adds additional context to the percentage table. While there are no glaring classification errors (i.e. no "Breakout" seasons predicted to be "Notable Decline" seasons and vice versa), the confusion matrix reveals reason behind the VORP PCA model's accuracy: Estimating towards the center. Since, by the nature of the classification system, most of the true values will be in the middle categories (i.e. "Improvement", "Plateau", and "Worsening"), a model's accuracy would increase if its estimates were crowded in this range. Such a phenomenon is seen by how most seasons were predicted to be in the "Plateau" category on the confusion matrix, leaving very few entries to fill the "Breakout" and "Notable Decline" categories. This also ties into another key observation, which is that all 18 of the "Breakout" seasons were predicted incorrectly. Not only does this indicate that our model is a poor predictor of extreme increase in season quality, but also heavily limits its practical usage, as the knowledge that a player may have a breakout season would greatly impact the real-world processes of salary negotiations, trade decisions, and configuring lineups. 
+
+Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimates of anything having to do with future season quality under this experiment's methodology.
+
+## Limitations and Future Research
+

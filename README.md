@@ -33,6 +33,8 @@ For each dependent variable, standardized and unstandardized, four regression me
 | LASSO | Obtain optimal penalty factor (lambda) using m-fold cross validation and implement it when regressing on in-sample data |
 | Principal Component Analysis (PCA) | Obtain scree plot of PCs and keep minimum amount to encompass 95% of variation |
 
+Since OLS is poor at creating predictive models due to the variance introduced by its large estimates, it will be used as a comparison tool for the other three regressions (which are more equipped to handle predictive models due to their additional methods reducing variance) rather than a legitimate model unto itself. 
+
 ### Classification of Season Quality and Final Analysis
 
 Once the out-of-sample estimates have been calculated, they'll be compared against their true counterparts to access prediction accuracy. Since season quality is the underlying factor in this analysis, the means and standard deviations for each of the true values of the efficiency metric differentials were tabulated, with season quality being determined as such:
@@ -77,5 +79,7 @@ Ultimately, it can be concluded that PER, BPM, and VORP aren't valuable estimate
 In light of the unfavorable conclusion, it's worth noting that the methodology of this project has a number of potential flaws. The most prominent of these is the season classification system. While its implementation was simple, the system likely introduced systematic error into the experiment in many ways. One of these is the bounds of each category. The idea that only a few players can experience breakout seasons each year is intuitive, but the assumption that the proportion of bounds remains identical for each year is unsubstantiated. In reality, the amount of breakouts in a given season is dependent on a variety of personal, team, and administrative/coaching factors and changes dramatically each year. As a result, the classification system not only misrepresents the quality of each season by insisting a certain quantity must be in the extreme categories (i.e. Breakout or Notable Decline), but distorts the estimated statistical values through the same means, adding bias into the experiment. 
 
 Another major issue with the classification system is its misalignment with the goals of this project. In other words, the system was meant to demonstrate whether the regression models were generally accurate and could adequately predict breakout seasons, but analysis of the results suggests otherwise. Instead of having both of these traits, the most accurate model achieved its percentage accuracy by categorizing most seasons into the more prevalent middle categories, thus boosting this metric without contributing any meaningful predictions. The fact that the means of classifying seasons rewards crowding the middle categories rather than correctly predicting breakout seasons is evidence of a fundamental detachment from the experiment's intentions, implying it cannot be used on subsequent trials. 
+
+Outside of the classification system, 
 
 If this project were to be repeated, the classification system would experience a major overhaul.

@@ -84,6 +84,6 @@ Outside of the classification system, other small issues persist in the study. F
 
 If this project were to be repeated, the classification system would experience a major overhaul. One potential approach is use a metric independent from any of the efficiency statistics utilized in the study. Since each regression model had differing dependent variables depending on which efficiency metric they predicted, comparison between models with different metrics became a massive problem. Having a consistent dependent variable for each regression would not only remedy the comparison issue, but also contribute towards solving the previously mentioned problems with the season classification system.
 
-
+After researching multiple advanced statistics, the best option for a consistent dependent variable would be [BBall Index's](https://www.bball-index.com/lebron-introduction/) LEBRON (Luck-adjusted player Estimate using a Box prior Regularized ON-off) metric. 
 
 

@@ -84,6 +84,10 @@ Outside of the classification system, other small issues persist in the study. F
 
 If this project were to be repeated, the classification system would experience a major overhaul. One potential approach is use a metric independent from any of the efficiency statistics utilized in the study. Since each regression model had differing dependent variables depending on which efficiency metric they predicted, comparison between models with different metrics became a massive problem. Having a consistent dependent variable for each regression would not only remedy the comparison issue, but also contribute towards solving the previously mentioned problems with the season classification system.
 
-After researching multiple advanced statistics, the best option for a consistent dependent variable would be [BBall Index's](https://www.bball-index.com/lebron-introduction/) LEBRON (Luck-adjusted player Estimate using a Box prior Regularized ON-off) metric. 
+After researching multiple advanced statistics, the best option for a consistent dependent variable would be [BBall Index's](https://www.bball-index.com/lebron-introduction/) LEBRON (Luck-adjusted player Estimate using a Box prior Regularized ON-off) metric. LEBRON, according to BBall Index's website, evaluates a player's offensive and defensive impact per 100 on-court possessions through consideration of weighted box score, on-off calculations, teammate/opponent quality, luck adjustments (factors due to luck/variance rather than player impact), and Wins Added (number of wins a player has added to a team in a given season). Given the comprehensive level of relevant factors included in its calculations and adjustments that account for random variance, LEBRON is among the most complete estimates of total player impact available. More details about LEBRON can be found using the above link. 
+
+Instead of categorizing seasons based on the mean and standard deviation of each value, bounds for each classification will be a range of LEBRON differential values chosen based on research of career breakouts and declines as they relate to such values. 
+
+
 
 
